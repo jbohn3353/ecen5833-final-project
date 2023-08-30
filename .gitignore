@@ -66,3 +66,6 @@ GNU\ ARM*
 
 # Project import result
 imported_project_report.html
+
+# pdf's for assignment
+*.pdf
