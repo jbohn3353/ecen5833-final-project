@@ -4,6 +4,7 @@
    Created on: Dec 12, 2018
        Author: Dan Walkes
    Updated by Dave Sluiter Dec 31, 2020. Minor edits with #defines.
+   Updated by James Bohn Sep 1, 2023. Completed assignment 1 of ECEN 5823
 
    March 17
    Dave Sluiter: Use this file to define functions that set up or control GPIOs.

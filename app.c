@@ -33,6 +33,7 @@
  *              It is to be used only for ECEN 5823 "IoT Embedded Firmware".
  *              The MSLA referenced above is in effect.
  *
+ * Updated by James Bohn Sep 1, 2023. Completed assignment 1 of ECEN 5823
  *
  *
  * @student    James Bohn, james.bohn@colorado.edu

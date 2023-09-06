@@ -32,8 +32,7 @@
  *
  *
  *
- * Student edit: Add your name and email address here:
- * @student    Awesome Student, Awesome.Student@Colorado.edu
+ * @student    James Bohn, james.bohn@colorado.edu
  *
  *
  ******************************************************************************/
