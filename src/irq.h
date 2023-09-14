@@ -2,6 +2,6 @@
 #ifndef SRC_IRQ_H
 #define SRC_IRQ_H
 
-void irqInit();
+void LETIMER0_IRQHandler();
 
 #endif /* SRC_IRQ_H */

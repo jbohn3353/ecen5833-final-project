@@ -2,7 +2,6 @@
 #ifndef SRC_TIMERS_H
 #define SRC_TIMERS_H
 
-void timersInit();
-void timersStart();
+void initLETIMER0();
 
 #endif /* SRC_TIMERS_H */

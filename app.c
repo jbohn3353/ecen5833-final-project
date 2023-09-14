@@ -59,6 +59,8 @@
 #include "src/ble_device_type.h"
 #include "src/gpio.h"
 #include "src/lcd.h"
+#include "src/oscillators.h"
+#include "src/timers.h"
 
 
 // Students: Here is an example of how to correctly include logging functions in
@@ -72,7 +74,7 @@
 #define INCLUDE_LOG_DEBUG 1
 #include "src/log.h"
 
-
+#define DELAY_ITERS_PER_MS 3500
 
 
 // *************************************************
@@ -94,8 +96,11 @@
 // Students: We'll need to modify this for A2 onward so that compile time we
 //           control what the lowest EM (energy mode) the MCU sleeps to. So
 //           think "#if (expression)".
-//#define APP_IS_OK_TO_SLEEP      (false)
-#define APP_IS_OK_TO_SLEEP      (true)
+#if LOWEST_ENERGY_MODE == (EM0)
+#define APP_IS_OK_TO_SLEEP (false)
+#else
+#define APP_IS_OK_TO_SLEEP (true)
+#endif
 
 
 // Return values for app_sleep_on_isr_exit():
@@ -159,8 +164,20 @@ SL_WEAK void app_init(void)
   // This is called once during start-up.
   // Don't call any Bluetooth API functions until after the boot event.
 
-  gpioInit();
+#if LOWEST_ENERGY_MODE == 1
+  sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
+#endif
 
+#if LOWEST_ENERGY_MODE == 2
+  sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM2);
+#endif
+
+  oscillatorsInit();
+  gpioInit();
+  initLETIMER0();
+
+  NVIC_ClearPendingIRQ(LETIMER0_IRQn);
+  NVIC_EnableIRQ(LETIMER0_IRQn);
 } // app_init()
 
 
@@ -197,15 +214,7 @@ SL_WEAK void app_process_action(void)
   //         We will create/use a scheme that is far more energy efficient in
   //         later assignments.
 
-  delayApprox(3500000);
-
-  gpioLed0SetOn();
-  gpioLed1SetOn();
-
-  delayApprox(3500000);
-
-  gpioLed0SetOff();
-  gpioLed1SetOff();
+   delayApprox(1 * DELAY_ITERS_PER_MS);
 
 } // app_process_action()
 
