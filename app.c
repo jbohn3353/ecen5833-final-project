@@ -94,8 +94,8 @@
 // Students: We'll need to modify this for A2 onward so that compile time we
 //           control what the lowest EM (energy mode) the MCU sleeps to. So
 //           think "#if (expression)".
-#define APP_IS_OK_TO_SLEEP      (false)
-//#define APP_IS_OK_TO_SLEEP      (true)
+//#define APP_IS_OK_TO_SLEEP      (false)
+#define APP_IS_OK_TO_SLEEP      (true)
 
 
 // Return values for app_sleep_on_isr_exit():
