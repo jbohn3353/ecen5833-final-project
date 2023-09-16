@@ -1,11 +1,17 @@
+/**
+ * @file      timers.c
+ * @brief     Initializes and manages timers for the EFM32, (minus interrupt handlers)
+ * @author    James Bohn
+ * @date      Sep 15, 2023
+ */
 
-#include "em_letimer.h"
 #include "timers.h"
 
 // Include logging for this file
 #define INCLUDE_LOG_DEBUG 1
 #include "log.h"
 
+#include "em_letimer.h"
 #include "app.h"
 
 #if LOWEST_ENERGY_MODE == 3
@@ -16,6 +22,9 @@
 
 #define ACTUAL_CLOCK_FRQ  BASE_CLOCK_FRQ/LETIMER_PRESCALER_VAL
 
+/**
+ * @brief Initialize LETIMER0, should be called during system startup
+ */
 void initLETIMER0()
 {
   LETIMER_Init_TypeDef letimer_init;

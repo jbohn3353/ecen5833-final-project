@@ -1,12 +1,18 @@
-
-#include "em_cmu.h"
-#include "app.h"
+/**
+ * @file      oscillators.c
+ * @brief     Initializes and manages oscillators/clocks for the EFM32
+ * @author    James Bohn
+ * @date      Sep 15, 2023
+ */
 
 #include "oscillators.h"
 
 // Include logging for this file
 #define INCLUDE_LOG_DEBUG 1
 #include "log.h"
+
+#include "em_cmu.h"
+#include "app.h"
 
 #if LOWEST_ENERGY_MODE == 3
 #define LETIMER0_OSC    ((CMU_Osc_TypeDef)      (cmuOsc_ULFRCO))
@@ -16,6 +22,9 @@
 #define LETIMER0_REF    ((CMU_Select_TypeDef)   (cmuSelect_LFXO))
 #endif
 
+/**
+ * @brief Initialize oscillators, should be called during system startup
+ */
 void oscillatorsInit()
 {
   CMU_OscillatorEnable(LETIMER0_OSC, true, true);

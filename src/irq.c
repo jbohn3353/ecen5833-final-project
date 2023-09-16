@@ -1,6 +1,9 @@
-
-#include "em_letimer.h"
-#include "gpio.h"
+/**
+ * @file      irq.c
+ * @brief     Defines interrupt handlers for the EFM32
+ * @author    James Bohn
+ * @date      Sep 15, 2023
+ */
 
 #include "irq.h"
 
@@ -8,9 +11,15 @@
 #define INCLUDE_LOG_DEBUG 1
 #include "log.h"
 
+#include "em_letimer.h"
+#include "gpio.h"
+
 static void LETIMER0_UF_Handler();
 static void LETIMER0_COMP1_Handler();
 
+/**
+ * @brief Gets, clears, and process LETIMER0 interrupts
+ */
 void LETIMER0_IRQHandler()
 {
   // fetch
@@ -29,16 +38,22 @@ void LETIMER0_IRQHandler()
   {
       LETIMER0_COMP1_Handler();
   }
-}
+} // LETIMER0_IRQHandler()
 
+/**
+ * @brief Processes LETIMER0 UF interrupts, turning LEDs off
+ */
 static void LETIMER0_UF_Handler()
 {
   gpioLed0SetOff();
   gpioLed1SetOff();
-}
+} // LETIMER0_UF_Handler()
 
+/**
+ * @brief Processes LETIMER0 COMP1 interrupts, turning LEDs on
+ */
 static void LETIMER0_COMP1_Handler()
 {
   gpioLed0SetOn();
   gpioLed1SetOn();
-}
+} // LETIMER0_COMP1_Handler()
