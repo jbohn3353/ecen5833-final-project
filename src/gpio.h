@@ -40,6 +40,9 @@ void gpioLed1SetOn();
 void gpioLed1SetOff();
 void gpioLed1Toggle();
 
+void gpioSensorEnableSetOn();
+void gpioSensorEnableSetOff();
+
 
 
 

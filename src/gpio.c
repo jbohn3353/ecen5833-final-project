@@ -42,6 +42,9 @@
 #define LED0_pin   (0x4)
 #define LED1_pin   (0x5)
 
+#define SENSOR_ENABLE_PORT  (gpioPortD)
+#define SENSOR_ENABLE_PIN   (15)
+
 static int led0State = 0;
 static int led1State = 0;
 
@@ -114,6 +117,14 @@ void gpioLed1Toggle()
   }
 }
 
+void gpioSensorEnableSetOn()
+{
+  GPIO_PinOutSet(SENSOR_ENABLE_PORT, SENSOR_ENABLE_PIN);
+}
 
+void gpioSensorEnableSetOff()
+{
+  GPIO_PinOutClear(SENSOR_ENABLE_PORT, SENSOR_ENABLE_PIN);
+}
 
 
