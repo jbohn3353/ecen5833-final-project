@@ -45,8 +45,7 @@ void LETIMER0_IRQHandler()
  */
 static void LETIMER0_UF_Handler()
 {
-  gpioLed0SetOff();
-  gpioLed1SetOff();
+  schedSetEventLETIMER0_UF();
 } // LETIMER0_UF_Handler()
 
 /**
@@ -54,6 +53,5 @@ static void LETIMER0_UF_Handler()
  */
 static void LETIMER0_COMP1_Handler()
 {
-  gpioLed0SetOn();
-  gpioLed1SetOn();
+  schedSetEventLETIMER0_COMP1();
 } // LETIMER0_COMP1_Handler()
