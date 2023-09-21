@@ -214,7 +214,9 @@ SL_WEAK void app_process_action(void)
   //         We will create/use a scheme that is far more energy efficient in
   //         later assignments.
 
-   delayApprox(1 * DELAY_ITERS_PER_MS);
+   timerWaitUs(10000);
+   gpioLed0Toggle();
+   gpioLed1Toggle();
 
 } // app_process_action()
 

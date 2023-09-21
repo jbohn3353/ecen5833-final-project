@@ -15,12 +15,14 @@
 #include "app.h"
 
 #if LOWEST_ENERGY_MODE == 3
-#define BASE_CLOCK_FRQ    (1000)
+#define BASE_CLOCK_FRQ      (1000)
 #else
-#define BASE_CLOCK_FRQ    (32768)
+#define BASE_CLOCK_FRQ      (32768)
 #endif
 
-#define ACTUAL_CLOCK_FRQ  BASE_CLOCK_FRQ/LETIMER_PRESCALER_VAL
+#define ACTUAL_CLOCK_FRQ    (BASE_CLOCK_FRQ/LETIMER_PRESCALER_VAL)
+
+#define MAX_TIMER_WAIT_US   (8000000)
 
 /**
  * @brief Initialize LETIMER0, should be called during system startup
@@ -51,3 +53,54 @@ void initLETIMER0()
 
   LETIMER_Enable(LETIMER0, true);
 } // initLETIMER0()
+
+static uint32_t timerUsToTicks(uint32_t us)
+{
+  // cast back to small | cast up since mult. can be big |   round up
+  return (uint32_t) ((((uint64_t) us * ACTUAL_CLOCK_FRQ) + (1000000-1))/ 1000000);
+}
+
+// wait AT LEAST us_wait us, up to 8s
+void timerWaitUs(uint32_t us_wait)
+{
+  // bind values too large, values too small will be rounded up to minimum
+  // wait time
+  if(us_wait > MAX_TIMER_WAIT_US){
+      us_wait = MAX_TIMER_WAIT_US;
+  }
+
+  uint16_t new_cnt, diff;
+  uint32_t ticks_to_wait = timerUsToTicks(us_wait);
+  uint16_t prev_cnt = LETIMER_CounterGet(LETIMER0);
+
+  while(1)
+  {
+    new_cnt = LETIMER_CounterGet(LETIMER0);
+
+    if(new_cnt == prev_cnt)
+    {
+      continue;
+    }
+
+    // handler underflow
+    if(new_cnt > prev_cnt)
+    {
+      //    ticks bf uf |              ticks after uf             | count the actual uf as a tick
+      diff = prev_cnt + (LETIMER_CompareGet(LETIMER0, 0) - new_cnt) + 1;
+    }
+    else
+    {
+      diff =  prev_cnt - new_cnt;
+    }
+
+    if(diff >= ticks_to_wait)
+    {
+      return;
+    }
+    else
+    {
+      ticks_to_wait -= diff;
+      prev_cnt = new_cnt;
+    }
+  }
+}

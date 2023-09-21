@@ -8,7 +8,10 @@
 #ifndef SRC_TIMERS_H
 #define SRC_TIMERS_H
 
+#include <stdint.h>
+
 // Function Prototypes
 void initLETIMER0();
+void timerWaitUs(uint32_t us_wait);
 
 #endif /* SRC_TIMERS_H */
