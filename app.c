@@ -61,6 +61,8 @@
 #include "src/lcd.h"
 #include "src/oscillators.h"
 #include "src/timers.h"
+#include "src/i2c.h"
+#include "src/scheduler.h"
 
 
 // Students: Here is an example of how to correctly include logging functions in
@@ -227,6 +229,38 @@ SL_WEAK void app_process_action(void)
   // Notice: This function is not passed or has access to Bluetooth stack events.
   //         We will create/use a scheme that is far more energy efficient in
   //         later assignments.
+
+  schedEvt_e evt;
+
+  uint32_t temp_raw;
+  int32_t temp_c;
+
+  evt = schedGetNextEvent();
+
+  switch(evt){
+    case evtLETIMER0_UF:
+      gpioSensorEnableSetOn();
+      timerWaitUs(80000);
+      i2cWrite(I2C_SI7021_ADDR, I2C_SI7021_CMD_MEAURE_TEMP_NO_HOLD);
+      timerWaitUs(20000);
+      temp_raw = i2cRead(I2C_SI7021_ADDR, 2);
+      // data comes as big endian, system is little endian
+      temp_raw = (temp_raw >> 8) | ((temp_raw & 0xFF) << 8);
+      gpioSensorEnableSetOff();
+
+      temp_c = ((176*temp_raw)/65536) - 47;
+      LOG_INFO("Current temp: %d C", temp_c);
+      break;
+    case evtLETIMER0_COMP1:
+      break;
+    case evtNone:
+      break;
+    default:
+      LOG_INFO("Unkown event detected: %x", (uint32_t) evt);
+      break;
+  }
+
+  //convert
 
 } // app_process_action()
 
