@@ -76,7 +76,6 @@
 
 #define DELAY_ITERS_PER_MS 3500
 
-
 // *************************************************
 // Power Manager
 // *************************************************
@@ -178,6 +177,21 @@ SL_WEAK void app_init(void)
 
   NVIC_ClearPendingIRQ(LETIMER0_IRQn);
   NVIC_EnableIRQ(LETIMER0_IRQn);
+
+#if UNIT_TESTING == 1
+   timerWaitUs(10000);
+   gpioLed0Toggle();
+   gpioLed1Toggle();
+   timerWaitUs(10000);
+   gpioLed0Toggle();
+   gpioLed1Toggle();
+   timerWaitUs(100000);
+   gpioLed0Toggle();
+   gpioLed1Toggle();
+   timerWaitUs(1000000);
+   gpioLed0Toggle();
+   gpioLed1Toggle();
+#endif
 } // app_init()
 
 
@@ -213,10 +227,6 @@ SL_WEAK void app_process_action(void)
   // Notice: This function is not passed or has access to Bluetooth stack events.
   //         We will create/use a scheme that is far more energy efficient in
   //         later assignments.
-
-   timerWaitUs(10000);
-   gpioLed0Toggle();
-   gpioLed1Toggle();
 
 } // app_process_action()
 
