@@ -10,10 +10,10 @@
 
 // Put in order for priority, highest prio = lowest value
 typedef enum {
+  evtNone = 0,
   evtLETIMER0_UF = 1,
   evtLETIMER0_COMP1 = 2,
   evtC = 4,
-  evtD = 8,
 } schedEvt_e;
 
 schedEvt_e schedGetNextEvent();
