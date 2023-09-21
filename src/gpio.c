@@ -42,7 +42,8 @@
 #define LED0_pin   (0x4)
 #define LED1_pin   (0x5)
 
-
+static int led0State = 0;
+static int led1State = 0;
 
 // Set GPIO drive strengths and modes of operation
 void gpioInit()
@@ -63,28 +64,55 @@ void gpioInit()
 
 void gpioLed0SetOn()
 {
+  led0State = 1;
 	GPIO_PinOutSet(LED_port, LED0_pin);
 }
 
 
 void gpioLed0SetOff()
 {
-	GPIO_PinOutClear(LED_port, LED0_pin);
+  led0State = 0;
+  GPIO_PinOutClear(LED_port, LED0_pin);
 }
 
+void gpioLed0Toggle()
+{
+  led0State = !led0State;
+  if(led0State)
+  {
+    GPIO_PinOutSet(LED_port, LED0_pin);
+  }
+  else
+  {
+    GPIO_PinOutClear(LED_port, LED0_pin);
+  }
+}
 
 void gpioLed1SetOn()
 {
+  led1State = 1;
 	GPIO_PinOutSet(LED_port, LED1_pin);
 }
 
 
 void gpioLed1SetOff()
 {
+  led1State = 0;
 	GPIO_PinOutClear(LED_port, LED1_pin);
 }
 
-
+void gpioLed1Toggle()
+{
+  led1State = !led1State;
+  if(led1State)
+  {
+    GPIO_PinOutSet(LED_port, LED1_pin);
+  }
+  else
+  {
+    GPIO_PinOutClear(LED_port, LED1_pin);
+  }
+}
 
 
 
