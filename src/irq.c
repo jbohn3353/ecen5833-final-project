@@ -13,6 +13,7 @@
 
 #include "em_letimer.h"
 #include "gpio.h"
+#include "scheduler.h"
 
 static void LETIMER0_UF_Handler();
 static void LETIMER0_COMP1_Handler();
