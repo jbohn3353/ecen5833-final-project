@@ -1,8 +1,8 @@
-/*
- * scheduler.h
- *
- *  Created on: Sep 21, 2023
- *      Author: jbohn
+/**
+ * @file      scheduler.h
+ * @brief     Declares functions to our scheduler for the EFM32
+ * @author    James Bohn
+ * @date      Sep 20, 2023
  */
 
 #ifndef SRC_SCHEDULER_H_
@@ -13,7 +13,6 @@ typedef enum {
   evtNone = 0,
   evtLETIMER0_UF = 1,
   evtLETIMER0_COMP1 = 2,
-  evtC = 4,
 } schedEvt_e;
 
 schedEvt_e schedGetNextEvent();

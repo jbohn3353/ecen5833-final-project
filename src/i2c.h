@@ -1,8 +1,8 @@
-/*
- * i2c.h
- *
- *  Created on: Sep 21, 2023
- *      Author: jbohn
+/**
+ * @file      i2c.h
+ * @brief     Declares functions to manage i2c for the EFM32
+ * @author    James Bohn
+ * @date      Sep 20, 2023
  */
 
 #ifndef SRC_I2C_H_

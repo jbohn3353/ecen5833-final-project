@@ -54,13 +54,17 @@ void initLETIMER0()
   LETIMER_Enable(LETIMER0, true);
 } // initLETIMER0()
 
+/// @brief converts a number of microseconds to timer ticks
+/// @param uint32_t us - microseconds to convert
+/// @return uint32_t - number of ticks associated with us, rounded up
 static uint32_t timerUsToTicks(uint32_t us)
 {
   // cast back to small | cast up since mult. can be big |   round up
   return (uint32_t) ((((uint64_t) us * ACTUAL_CLOCK_FRQ) + (1000000-1))/ 1000000);
-}
+} // timerUsToTicks(uint32_t us)
 
-// wait AT LEAST us_wait us, up to 8s
+/// @brief use polling to delay for a specified number of us
+/// @param uint32_t us_wait - number of microseconds to wait
 void timerWaitUs(uint32_t us_wait)
 {
   // bind values too large, values too small will be rounded up to minimum
@@ -103,4 +107,4 @@ void timerWaitUs(uint32_t us_wait)
       prev_cnt = new_cnt;
     }
   }
-}
+} // timerWaitUs(uint32_t us_wait)

@@ -15,6 +15,8 @@
 
 static uint32_t pendingEvents;
 
+/// @brief return enum value of the next event to be processed
+/// @return schedEvt_e - next event to be processed
 schedEvt_e schedGetNextEvent()
 {
   schedEvt_e ret = 0;
@@ -37,6 +39,7 @@ schedEvt_e schedGetNextEvent()
   return ret;
 }
 
+/// @brief set sched flag for LETIMER0_UF event
 void schedSetEventLETIMER0_UF()
 {
   CORE_DECLARE_IRQ_STATE;
@@ -44,8 +47,9 @@ void schedSetEventLETIMER0_UF()
   CORE_ENTER_CRITICAL();
   pendingEvents |= evtLETIMER0_UF;
   CORE_EXIT_CRITICAL();
-}
+} // schedSetEventLETIMER0_UF()
 
+/// @brief set sched flag for LETIMER0_COMP1 event
 void schedSetEventLETIMER0_COMP1()
 {
   CORE_DECLARE_IRQ_STATE;
@@ -53,5 +57,5 @@ void schedSetEventLETIMER0_COMP1()
   CORE_ENTER_CRITICAL();
   pendingEvents |= evtLETIMER0_COMP1;
   CORE_EXIT_CRITICAL();
-}
+} // schedSetEventLETIMER0_COMP1()
 
