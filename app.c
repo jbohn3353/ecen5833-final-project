@@ -197,28 +197,6 @@ SL_WEAK void app_init(void)
 } // app_init()
 
 
-
-
-/*****************************************************************************
- * delayApprox(), private to this file.
- * A value of 3500000 is ~ 1 second. After assignment 1 you can delete or
- * comment out this function. Wait loops are a bad idea in general.
- * We'll discuss how to do this a better way in the next assignment.
- *****************************************************************************/
-static void delayApprox(int delay)
-{
-  volatile int i;
-
-  for (i = 0; i < delay; ) {
-      i=i+1;
-  }
-
-} // delayApprox()
-
-
-
-
-
 /**************************************************************************//**
  * Application Process Action.
  *****************************************************************************/
@@ -242,13 +220,14 @@ SL_WEAK void app_process_action(void)
       gpioSensorEnableSetOn();
       timerWaitUs(80000);
       i2cWrite(I2C_SI7021_ADDR, I2C_SI7021_CMD_MEAURE_TEMP_NO_HOLD);
-      timerWaitUs(20000);
+      timerWaitUs(12000);
       temp_raw = i2cRead(I2C_SI7021_ADDR, 2);
       // data comes as big endian, system is little endian
       temp_raw = (temp_raw >> 8) | ((temp_raw & 0xFF) << 8);
       gpioSensorEnableSetOff();
 
-      temp_c = ((176*temp_raw)/65536) - 47;
+      //     round to int   |     do float math
+      temp_c = (int32_t) (((175.72*(float)temp_raw)/65536) - 46.85);
       LOG_INFO("Current temp: %d C", temp_c);
       break;
     case evtLETIMER0_COMP1:

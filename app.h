@@ -47,7 +47,7 @@
 #ifndef APP_H
 #define APP_H
 
-#define LOWEST_ENERGY_MODE      (0)     // EM
+#define LOWEST_ENERGY_MODE      (3)     // EM
 #define LETIMER_ON_TIME_MS      (175)
 #define LETIMER_PERIOD_MS       (3000)
 
@@ -57,7 +57,7 @@
 #define LETIMER_PRESCALER_VAL   (4)
 #endif
 
-#define UNIT_TESTING (1)
+#define UNIT_TESTING (0)
 
 /**************************************************************************//**
  * Application Init.
