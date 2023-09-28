@@ -181,18 +181,22 @@ SL_WEAK void app_init(void)
   NVIC_EnableIRQ(LETIMER0_IRQn);
 
 #if UNIT_TESTING == 1
-   timerWaitUs(10000);
+   // test polled timer
+   timerWaitUs_polled(10000);
    gpioLed0Toggle();
    gpioLed1Toggle();
-   timerWaitUs(10000);
+   timerWaitUs_polled(10000);
    gpioLed0Toggle();
    gpioLed1Toggle();
-   timerWaitUs(100000);
+   timerWaitUs_polled(100000);
    gpioLed0Toggle();
    gpioLed1Toggle();
-   timerWaitUs(1000000);
+   timerWaitUs_polled(1000000);
    gpioLed0Toggle();
    gpioLed1Toggle();
+
+   // setup irq timer test
+   timerWaitUs_irq(1000000);
 #endif
 } // app_init()
 
@@ -217,20 +221,30 @@ SL_WEAK void app_process_action(void)
 
   switch(evt){
     case evtLETIMER0_UF:
-      gpioSensorEnableSetOn();
-      timerWaitUs(80000);
-      i2cWrite(I2C_SI7021_ADDR, I2C_SI7021_CMD_MEAURE_TEMP_NO_HOLD);
-      timerWaitUs(12000);
-      temp_raw = i2cRead(I2C_SI7021_ADDR, 2);
-      // data comes as big endian, system is little endian
-      temp_raw = (temp_raw >> 8) | ((temp_raw & 0xFF) << 8);
-      gpioSensorEnableSetOff();
-
-      //     round to int   |     do float math
-      temp_c = (int32_t) (((175.72*(float)temp_raw)/65536) - 46.85);
-      LOG_INFO("Current temp: %d C", temp_c);
+//      gpioSensorEnableSetOn();
+//      timerWaitUs_polled(80000);
+//      i2cWrite(I2C_SI7021_ADDR, I2C_SI7021_CMD_MEAURE_TEMP_NO_HOLD);
+//      timerWaitUs_polled(12000);
+//      temp_raw = i2cRead(I2C_SI7021_ADDR, 2);
+//      // data comes as big endian, system is little endian
+//      temp_raw = (temp_raw >> 8) | ((temp_raw & 0xFF) << 8);
+//      gpioSensorEnableSetOff();
+//
+//      //     round to int   |     do float math
+//      temp_c = (int32_t) (((175.72*(float)temp_raw)/65536) - 46.85);
+//      LOG_INFO("Current temp: %d C", temp_c);
       break;
     case evtLETIMER0_COMP1:
+
+      // test irq timer
+#if UNIT_TESTING == 1
+      gpioLed0Toggle();
+      gpioLed1Toggle();
+
+      timerWaitUs_irq(1000000);
+#endif
+
+
       break;
     case evtNone:
       break;
@@ -238,8 +252,6 @@ SL_WEAK void app_process_action(void)
       LOG_INFO("Unkown event detected: %x", (uint32_t) evt);
       break;
   }
-
-  //convert
 
 } // app_process_action()
 

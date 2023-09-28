@@ -50,9 +50,10 @@ static void LETIMER0_UF_Handler()
 } // LETIMER0_UF_Handler()
 
 /**
- * @brief Processes LETIMER0 COMP1 interrupts, turning LEDs on
+ * @brief Processes LETIMER0 COMP1 interrupts, announcing custom timer expiration
  */
 static void LETIMER0_COMP1_Handler()
 {
+  LETIMER_IntDisable(LETIMER0, LETIMER_IEN_COMP1);
   schedSetEventLETIMER0_COMP1();
 } // LETIMER0_COMP1_Handler()

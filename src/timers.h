@@ -12,6 +12,7 @@
 
 // Function Prototypes
 void initLETIMER0();
-void timerWaitUs(uint32_t us_wait);
+void timerWaitUs_polled(uint32_t us_wait);
+void timerWaitUs_irq(uint32_t us_wait);
 
 #endif /* SRC_TIMERS_H */

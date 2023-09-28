@@ -22,7 +22,8 @@
 
 #define ACTUAL_CLOCK_FRQ    (BASE_CLOCK_FRQ/LETIMER_PRESCALER_VAL)
 
-#define MAX_TIMER_WAIT_US   (8000000)
+#define MAX_TIMER_WAIT_POLLED_US    (8000000)
+#define MAX_TIMER_WAIT_IRQ_US       (LETIMER_PERIOD_MS * 1000)
 
 /**
  * @brief Initialize LETIMER0, should be called during system startup
@@ -46,10 +47,10 @@ void initLETIMER0()
   LETIMER_Init(LETIMER0, &letimer_init);
 
   LETIMER_CompareSet(LETIMER0, 0, ACTUAL_CLOCK_FRQ*LETIMER_PERIOD_MS/1000);
-  LETIMER_CompareSet(LETIMER0, 1, ACTUAL_CLOCK_FRQ*LETIMER_ON_TIME_MS/1000);
+//  LETIMER_CompareSet(LETIMER0, 1, ACTUAL_CLOCK_FRQ*LETIMER_ON_TIME_MS/1000);
 
   LETIMER_IntClear(LETIMER0, 0xFFFFFFFF);
-  LETIMER_IntEnable(LETIMER0, LETIMER_IEN_COMP1 | LETIMER_IEN_UF);
+  LETIMER_IntEnable(LETIMER0, LETIMER_IEN_UF);
 
   LETIMER_Enable(LETIMER0, true);
 } // initLETIMER0()
@@ -65,12 +66,12 @@ static uint32_t timerUsToTicks(uint32_t us)
 
 /// @brief use polling to delay for a specified number of us
 /// @param uint32_t us_wait - number of microseconds to wait
-void timerWaitUs(uint32_t us_wait)
+void timerWaitUs_polled(uint32_t us_wait)
 {
-  // bind values too large, values too small will be rounded up to minimum
+  // clamp values too large, values too small will be rounded up to minimum
   // wait time
-  if(us_wait > MAX_TIMER_WAIT_US){
-      us_wait = MAX_TIMER_WAIT_US;
+  if(us_wait > MAX_TIMER_WAIT_POLLED_US){
+      us_wait = MAX_TIMER_WAIT_POLLED_US;
   }
 
   uint16_t new_cnt, diff;
@@ -108,3 +109,30 @@ void timerWaitUs(uint32_t us_wait)
     }
   }
 } // timerWaitUs(uint32_t us_wait)
+
+void timerWaitUs_irq(uint32_t us_wait)
+{
+  // clamp values too large, values too small will be rounded up to minimum
+  // wait time
+  if(us_wait > MAX_TIMER_WAIT_IRQ_US){
+      us_wait = MAX_TIMER_WAIT_IRQ_US;
+  }
+
+  uint32_t ticks_to_wait = timerUsToTicks(us_wait);
+  uint16_t cur_cnt = LETIMER_CounterGet(LETIMER0);
+  uint16_t int_cnt;
+
+  // Handle underflow
+  if(ticks_to_wait > cur_cnt)
+  {
+    //               cur reload val           |     ticks after uf      | count uf as tick
+    int_cnt = LETIMER_CompareGet(LETIMER0, 0) - (ticks_to_wait - cur_cnt) + 1;
+  }
+  else
+  {
+    int_cnt = cur_cnt - ticks_to_wait;
+  }
+
+  LETIMER_CompareSet(LETIMER0, 1, int_cnt);
+  LETIMER_IntEnable(LETIMER0, LETIMER_IEN_COMP1);
+}
