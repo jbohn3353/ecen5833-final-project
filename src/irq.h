@@ -8,7 +8,11 @@
 #ifndef SRC_IRQ_H
 #define SRC_IRQ_H
 
+#include <stdint.h>
+
 // Function Prototypes
 void LETIMER0_IRQHandler();
+
+uint64_t irqTimerUFCntGet();
 
 #endif /* SRC_IRQ_H */

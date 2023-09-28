@@ -18,6 +18,13 @@
 static void LETIMER0_UF_Handler();
 static void LETIMER0_COMP1_Handler();
 
+static uint64_t uf_cnt = 0;
+
+uint64_t irqTimerUFCntGet()
+{
+  return uf_cnt;
+}
+
 /**
  * @brief Gets, clears, and process LETIMER0 interrupts
  */
@@ -46,6 +53,7 @@ void LETIMER0_IRQHandler()
  */
 static void LETIMER0_UF_Handler()
 {
+  uf_cnt += 1;
   schedSetEventLETIMER0_UF();
 } // LETIMER0_UF_Handler()
 

@@ -221,18 +221,18 @@ SL_WEAK void app_process_action(void)
 
   switch(evt){
     case evtLETIMER0_UF:
-//      gpioSensorEnableSetOn();
-//      timerWaitUs_polled(80000);
-//      i2cWrite(I2C_SI7021_ADDR, I2C_SI7021_CMD_MEAURE_TEMP_NO_HOLD);
-//      timerWaitUs_polled(12000);
-//      temp_raw = i2cRead(I2C_SI7021_ADDR, 2);
-//      // data comes as big endian, system is little endian
-//      temp_raw = (temp_raw >> 8) | ((temp_raw & 0xFF) << 8);
-//      gpioSensorEnableSetOff();
-//
-//      //     round to int   |     do float math
-//      temp_c = (int32_t) (((175.72*(float)temp_raw)/65536) - 46.85);
-//      LOG_INFO("Current temp: %d C", temp_c);
+      gpioSensorEnableSetOn();
+      timerWaitUs_polled(80000);
+      i2cWrite(I2C_SI7021_ADDR, I2C_SI7021_CMD_MEAURE_TEMP_NO_HOLD);
+      timerWaitUs_polled(12000);
+      temp_raw = i2cRead(I2C_SI7021_ADDR, 2);
+      // data comes as big endian, system is little endian
+      temp_raw = (temp_raw >> 8) | ((temp_raw & 0xFF) << 8);
+      gpioSensorEnableSetOff();
+
+      //     round to int   |     do float math
+      temp_c = (int32_t) (((175.72*(float)temp_raw)/65536) - 46.85);
+      LOG_INFO("Current temp: %d C", temp_c);
       break;
     case evtLETIMER0_COMP1:
 

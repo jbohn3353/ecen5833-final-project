@@ -57,7 +57,7 @@
 #define LETIMER_PRESCALER_VAL   (4)
 #endif
 
-#define UNIT_TESTING (1)
+#define UNIT_TESTING (0)
 
 /**************************************************************************//**
  * Application Init.

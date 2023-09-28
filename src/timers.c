@@ -136,3 +136,10 @@ void timerWaitUs_irq(uint32_t us_wait)
   LETIMER_CompareSet(LETIMER0, 1, int_cnt);
   LETIMER_IntEnable(LETIMER0, LETIMER_IEN_COMP1);
 }
+
+uint64_t timerMilliseconds()
+{
+  uint32_t ticks_since_uf = LETIMER_CompareGet(LETIMER0, 0) - LETIMER_CounterGet(LETIMER0);
+  //                  time from UFs               |               time since last UF
+  return (irqTimerUFCntGet() * LETIMER_PERIOD_MS) + (ticks_since_uf * 1000)/ACTUAL_CLOCK_FRQ;
+}
