@@ -52,7 +52,7 @@
 #if INCLUDE_LOG_DEBUG
 
 #define LOG_DO(message,level, ...) \
-  app_log( "%5"PRIu32":%s:%s: " message "\n", loggerGetTimestamp(), level, __func__, ##__VA_ARGS__ )
+  app_log( "%5"PRIu32":%s:%s: " message "\r\n", loggerGetTimestamp(), level, __func__, ##__VA_ARGS__ )
 uint32_t loggerGetTimestamp (void);
 void     printSLErrorString (sl_status_t status);
 
