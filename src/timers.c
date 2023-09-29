@@ -13,6 +13,7 @@
 
 #include "em_letimer.h"
 #include "app.h"
+#include "irq.h"
 
 #if LOWEST_ENERGY_MODE == 3
 #define BASE_CLOCK_FRQ      (1000)
@@ -68,10 +69,13 @@ static uint32_t timerUsToTicks(uint32_t us)
 /// @param uint32_t us_wait - number of microseconds to wait
 void timerWaitUs_polled(uint32_t us_wait)
 {
-  // clamp values too large, values too small will be rounded up to minimum
-  // wait time
+  // clamp values too large
   if(us_wait > MAX_TIMER_WAIT_POLLED_US){
       us_wait = MAX_TIMER_WAIT_POLLED_US;
+  }
+  else if(us_wait == 0)
+  {
+      return;
   }
 
   uint16_t new_cnt, diff;
@@ -112,11 +116,17 @@ void timerWaitUs_polled(uint32_t us_wait)
 
 void timerWaitUs_irq(uint32_t us_wait)
 {
-  // clamp values too large, values too small will be rounded up to minimum
-  // wait time
-  if(us_wait > MAX_TIMER_WAIT_IRQ_US){
+
+  // clamp values too large
+  if(us_wait > MAX_TIMER_WAIT_IRQ_US)
+  {
       us_wait = MAX_TIMER_WAIT_IRQ_US;
   }
+  else if(us_wait == 0)
+  {
+      return;
+  }
+
 
   uint32_t ticks_to_wait = timerUsToTicks(us_wait);
   uint16_t cur_cnt = LETIMER_CounterGet(LETIMER0);
@@ -134,6 +144,7 @@ void timerWaitUs_irq(uint32_t us_wait)
   }
 
   LETIMER_CompareSet(LETIMER0, 1, int_cnt);
+  LETIMER_IntClear(LETIMER0, LETIMER_IF_COMP1);
   LETIMER_IntEnable(LETIMER0, LETIMER_IEN_COMP1);
 }
 
