@@ -13,6 +13,8 @@
 
 #include "em_core.h"
 #include "i2c.h"
+#include "timers.h"
+#include "gpio.h"
 
 static uint32_t pendingEvents;
 

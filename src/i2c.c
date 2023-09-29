@@ -44,8 +44,7 @@ void i2cInit()
   I2CSPM_Init(&I2C_Config);
 
   uint32_t freq = I2C_BusFreqGet(I2C0);
-  freq = I2C0->RXDATA;
-  freq = I2C0->RXDATA;
+  freq++;
 }
 
 ///// @brief perform an i2c read of byte_len bytes from address addr
