@@ -12,6 +12,7 @@
 
 // Function Prototypes
 void LETIMER0_IRQHandler();
+void I2C0_IRQHandler();
 
 uint64_t irqTimerUFCntGet();
 

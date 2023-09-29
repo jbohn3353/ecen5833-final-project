@@ -12,6 +12,7 @@
 #include "log.h"
 
 #include "em_letimer.h"
+#include "sl_i2cspm.h"
 #include "gpio.h"
 #include "scheduler.h"
 
@@ -65,3 +66,20 @@ static void LETIMER0_COMP1_Handler()
   LETIMER_IntDisable(LETIMER0, LETIMER_IEN_COMP1);
   schedSetEventLETIMER0_COMP1();
 } // LETIMER0_COMP1_Handler()
+
+void I2C0_IRQHandler()
+{
+  I2C_TransferReturn_TypeDef transferStatus;
+
+  transferStatus = I2C_Transfer(I2C0);
+
+  if(transferStatus == i2cTransferDone)
+  {
+    schedSetEventI2C0_TransferComplete();
+  }
+
+  if(transferStatus < 0)
+  {
+    LOG_ERROR("%d", (int32_t)transferStatus);
+  }
+}
