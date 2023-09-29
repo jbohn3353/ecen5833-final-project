@@ -1,6 +1,6 @@
 /**
  * @file      i2c.c
- * @brief     Declares functions to manage i2c for the EFM32
+ * @brief     Defines functions to manage i2c for the EFM32
  * @author    James Bohn
  * @date      Sep 20, 2023
  */
@@ -20,6 +20,8 @@ static I2C_TransferSeq_TypeDef  transferSequence;
 static uint8_t                  cmd_data;
 static uint32_t                 read_data;
 
+/// @brief reads static variable holding most recent data from i2c read
+/// @return uint32_t - most recent i2c read data
 uint32_t i2cGetReadData()
 {
   return read_data;
@@ -50,7 +52,6 @@ void i2cInit()
 ///// @brief perform an i2c read of byte_len bytes from address addr
 ///// @param uint16_t addr - device addr to read from
 ///// @param uint16_t byte_len - number of bytes to read, <= 4
-///// @return bytes read in a single var
 void i2cRead(uint16_t addr, uint16_t byte_len)
 {
   I2C_TransferReturn_TypeDef transferStatus;

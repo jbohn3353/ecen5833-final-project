@@ -114,6 +114,9 @@ void timerWaitUs_polled(uint32_t us_wait)
   }
 } // timerWaitUs(uint32_t us_wait)
 
+/// @brief delay for a specified number of us, using an interrupt to wakeup and
+///          set an event flag
+/// @param uint32_t us_wait - number of microseconds to wait
 void timerWaitUs_irq(uint32_t us_wait)
 {
 
@@ -148,6 +151,8 @@ void timerWaitUs_irq(uint32_t us_wait)
   LETIMER_IntEnable(LETIMER0, LETIMER_IEN_COMP1);
 }
 
+/// @brief get/calculate number of milliseconds since systems startup
+/// @return uint64_t - number of milliseconds since systems startup
 uint64_t timerMilliseconds()
 {
   uint32_t ticks_since_uf = LETIMER_CompareGet(LETIMER0, 0) - LETIMER_CounterGet(LETIMER0);

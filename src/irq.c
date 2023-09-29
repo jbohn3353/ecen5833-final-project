@@ -67,6 +67,9 @@ static void LETIMER0_COMP1_Handler()
   schedSetEventLETIMER0_COMP1();
 } // LETIMER0_COMP1_Handler()
 
+/**
+ * @brief Handles I2C0 interrupts, mostly through a state machine in the i2c API
+ */
 void I2C0_IRQHandler()
 {
   I2C_TransferReturn_TypeDef transferStatus;

@@ -1,8 +1,8 @@
-/*
- * scheduler.c
- *
- *  Created on: Sep 21, 2023
- *      Author: jbohn
+/**
+ * @file      scheduler.h
+ * @brief     Defines functions to our scheduler for the EFM32
+ * @author    James Bohn
+ * @date      Sep 20, 2023
  */
 
 #include "scheduler.h"
@@ -81,6 +81,10 @@ typedef enum {
   TEMP_NUM_STATES
 } tempState_e;
 
+/// @brief Runs a state machine to periodically take temperature measurements
+///          from the SI7021 on the dev board
+/// @param schedEvt_e evt - an enum from the scheduler representing the event that
+///          just occurred
 void temperature_state_machine(schedEvt_e evt)
 {
   static tempState_e    nextState = TEMP_STATE0_IDLE;
