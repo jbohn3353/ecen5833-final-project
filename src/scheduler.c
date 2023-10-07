@@ -50,9 +50,11 @@ void schedSetEventI2C0_TransferComplete()
   CORE_EXIT_CRITICAL();
 } // schedSetEventI2C0_TransferComplete()
 
+/// @brief run all state machines that operate on external events
+/// @param sl_bt_msg_t *evt - event from the bt stack to be acted upon
 void run_state_machines(sl_bt_msg_t *evt){
   temperature_state_machine(evt);
-}
+} // run_state_machines()
 
 typedef enum {
   TEMP_STATE0_IDLE,
@@ -65,13 +67,9 @@ typedef enum {
 
 /// @brief Runs a state machine to periodically take temperature measurements
 ///          from the SI7021 on the dev board
-/// @param schedEvt_e evt - an enum from the scheduler representing the event that
-///          just occurred
+/// @param sl_bt_msg_t *evt - event from the bt stack to be acted upon
 static void temperature_state_machine(sl_bt_msg_t *evt)
 {
-
-
-
   static tempState_e    nextState = TEMP_STATE0_IDLE;
          tempState_e    currentState;
 
@@ -81,11 +79,13 @@ static void temperature_state_machine(sl_bt_msg_t *evt)
 
   currentState = nextState;
 
+  // Early retun if evt is not an external signal
   if(SL_BT_MSG_ID(evt->header) != sl_bt_evt_system_external_signal_id)
   {
     return;
   }
 
+  // Get actual data from the event and stored BT state
   schedEvt_e sig = evt->data.evt_system_external_signal.extsignals;
   ble_data_struct_t *bleDataPtr = bleGetStruct();
 
@@ -153,7 +153,7 @@ static void temperature_state_machine(sl_bt_msg_t *evt)
 
         //     round to int   |     do float math
         temp_c = (int32_t) (((175.72*(float)temp_raw)/65536) - 46.85);
-        LOG_INFO("Current temp: %d C", temp_c);
+//        LOG_INFO("Current temp: %d C", temp_c);
 
         sc = sl_bt_gatt_server_write_attribute_value(
                            gattdb_temperature_measurement,
@@ -162,7 +162,7 @@ static void temperature_state_machine(sl_bt_msg_t *evt)
                            (uint8_t *)&temp_c);
         if (sc != SL_STATUS_OK)
         {
-//          LOG_ERROR("Error with sl_bt_gatt_server_write_attribute_value: %x", sc);
+          LOG_ERROR("Error with sl_bt_gatt_server_write_attribute_value: %x", sc);
         }
 
         // We recheck the BT connection and indication statuses again to make
@@ -201,4 +201,4 @@ static void temperature_state_machine(sl_bt_msg_t *evt)
       LOG_ERROR("Invaid temperature state machine state: %d", (int32_t)currentState);
       break;
   }
-}
+} // temperature_state_machine()

@@ -1,8 +1,9 @@
-/*
- * ble.c
- *
- *  Created on: Oct 2, 2023
- *      Author: jbohn
+/**
+ * @file      ble.h
+ * @brief     Defines functions of our BLE module for the EFM32
+ * @author    James Bohn
+ * @date      Oct 6, 2023
+ * @attirbute Found some useful API calls from the SOC thermometer project
  */
 
 /// @attribute The SoC thermometer example project
@@ -20,17 +21,23 @@
 #define CONNECTION_INTERVAL_MAX_MS    (75)
 #define SLAVE_LATENCY_MS              (300)
 #define SLAVE_LATENCY_CNT             ((SLAVE_LATENCY_MS/CONNECTION_INTERVAL_MAX_MS) - 1)
+
 // must be at least (1 + SLAVE_LATENCY_CNT) * (2 * CONNECTION_INTERVAL_MS)
 #define SUPERVISION_TIMEOUT_MS        ((2 + SLAVE_LATENCY_CNT) * (2 * CONNECTION_INTERVAL_MAX_MS))
 
 // BLE private data
-ble_data_struct_t ble_data = {0};
+static ble_data_struct_t ble_data = {0};
 
-ble_data_struct_t * bleGetStruct()
+/// @brief provide global access to BLE state static variable by returning a pointer
+/// @return ble_data_struct_t* - pointer to stored BLE data
+ble_data_struct_t* bleGetStruct()
 {
   return &ble_data;
-}
+} // bleGetStruct
 
+/// @brief handle events provided from the ble stacks (event handler, not state machine
+///        even though some data is saved)
+/// @param sl_bt_msg_t *evt - BT stack event to be acted upon
 void handle_ble_event(sl_bt_msg_t *evt)
 {
   sl_status_t sc;
@@ -202,6 +209,7 @@ void handle_ble_event(sl_bt_msg_t *evt)
 //      LOG_INFO("Conn interval : %u ms", (uint32_t) (param_info.interval*5)/4);
 //      LOG_INFO("Slave latency: %u ms", (uint32_t) (param_info.latency + 1)*(param_info.interval*5)/4);
 //      LOG_INFO("Supervision timeout: %u ms", (uint32_t) param_info.timeout*10);
+
       break;
 
     //**************************************************************************
@@ -279,6 +287,7 @@ void handle_ble_event(sl_bt_msg_t *evt)
       //sl_bt_evt_gatt_server_indication_timeout_t ind_timeot_info = evt->data.evt_gatt_server_indication_timeout;
 
       ble_data.indication_inflight = 0;
+
       break;
 
     //**************************************************************************
@@ -286,4 +295,4 @@ void handle_ble_event(sl_bt_msg_t *evt)
     //**************************************************************************
 
   }
-}
+} // handle_ble_event()

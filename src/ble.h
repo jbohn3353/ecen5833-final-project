@@ -1,8 +1,8 @@
-/*
- * ble.h
- *
- *  Created on: Oct 2, 2023
- *      Author: jbohn
+/**
+ * @file      ble.h
+ * @brief     Declares functions and datatypes of our BLE module for the EFM32
+ * @author    James Bohn
+ * @date      Oct 6, 2023
  */
 
 #ifndef SRC_BLE_H_
@@ -34,11 +34,13 @@ typedef struct {
  uint8_t indication_inflight;
 
  // values unique for client
+
 } ble_data_struct_t;
+
+// Function Declarations
 
 ble_data_struct_t * bleGetStruct();
 
 void handle_ble_event(sl_bt_msg_t *evt);
-
 
 #endif /* SRC_BLE_H_ */
