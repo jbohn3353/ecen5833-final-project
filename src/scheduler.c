@@ -15,32 +15,10 @@
 #include "i2c.h"
 #include "timers.h"
 #include "gpio.h"
+#include "gatt_db.h"
+#include "ble.h"
 
-static uint32_t pendingEvents;
-
-/// @brief return enum value of the next event to be processed
-/// @return schedEvt_e - next event to be processed
-schedEvt_e schedGetNextEvent()
-{
-  schedEvt_e ret = 0;
-
-  for(int i = 0; i < 32; ++i)
-  {
-    if(pendingEvents & (1 << i))
-    {
-      ret = (schedEvt_e) 1 << i;
-      break;
-    }
-  }
-
-  CORE_DECLARE_IRQ_STATE;
-
-  CORE_ENTER_CRITICAL();
-  pendingEvents &= ~ret;
-  CORE_EXIT_CRITICAL();
-
-  return ret;
-}
+static void temperature_state_machine(sl_bt_msg_t *evt);
 
 /// @brief set sched flag for LETIMER0_UF event
 void schedSetEventLETIMER0_UF()
@@ -48,7 +26,7 @@ void schedSetEventLETIMER0_UF()
   CORE_DECLARE_IRQ_STATE;
 
   CORE_ENTER_CRITICAL();
-  pendingEvents |= evtLETIMER0_UF;
+  sl_bt_external_signal(evtLETIMER0_UF);
   CORE_EXIT_CRITICAL();
 } // schedSetEventLETIMER0_UF()
 
@@ -58,7 +36,7 @@ void schedSetEventLETIMER0_COMP1()
   CORE_DECLARE_IRQ_STATE;
 
   CORE_ENTER_CRITICAL();
-  pendingEvents |= evtLETIMER0_COMP1;
+  sl_bt_external_signal(evtLETIMER0_COMP1);
   CORE_EXIT_CRITICAL();
 } // schedSetEventLETIMER0_COMP1()
 
@@ -68,9 +46,13 @@ void schedSetEventI2C0_TransferComplete()
   CORE_DECLARE_IRQ_STATE;
 
   CORE_ENTER_CRITICAL();
-  pendingEvents |= evtI2C0_TransferComplete;
+  sl_bt_external_signal(evtI2C0_TransferComplete);
   CORE_EXIT_CRITICAL();
 } // schedSetEventI2C0_TransferComplete()
+
+void run_state_machines(sl_bt_msg_t *evt){
+  temperature_state_machine(evt);
+}
 
 typedef enum {
   TEMP_STATE0_IDLE,
@@ -85,22 +67,40 @@ typedef enum {
 ///          from the SI7021 on the dev board
 /// @param schedEvt_e evt - an enum from the scheduler representing the event that
 ///          just occurred
-void temperature_state_machine(schedEvt_e evt)
+static void temperature_state_machine(sl_bt_msg_t *evt)
 {
+
+
+
   static tempState_e    nextState = TEMP_STATE0_IDLE;
          tempState_e    currentState;
 
    uint32_t temp_raw = 0;
    int32_t temp_c = 0;
+   sl_status_t sc = 0;
 
   currentState = nextState;
+
+  if(SL_BT_MSG_ID(evt->header) != sl_bt_evt_system_external_signal_id)
+  {
+    return;
+  }
+
+  schedEvt_e sig = evt->data.evt_system_external_signal.extsignals;
+  ble_data_struct_t *bleDataPtr = bleGetStruct();
 
   switch (currentState)
   {
     case TEMP_STATE0_IDLE:
       nextState = TEMP_STATE0_IDLE;
 
-      if(evt == evtLETIMER0_UF)
+      // Only start temp measurement if connection is currently open
+      // This change is very simple and results in temperature measurements
+      // that are in process finishing if the connection closes in the middle
+      // of the measurement but thats fine
+      if(sig == evtLETIMER0_UF        &&
+         bleDataPtr->conn_open        &&
+         bleDataPtr->temp_indication_en)
       {
         gpioSensorEnableSetOn();
         timerWaitUs_irq(80000);
@@ -111,7 +111,7 @@ void temperature_state_machine(schedEvt_e evt)
     case TEMP_STATE1_WARMUP:
       nextState = TEMP_STATE1_WARMUP;
 
-      if(evt == evtLETIMER0_COMP1)
+      if(sig == evtLETIMER0_COMP1)
       {
         sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
         i2cWrite(I2C_SI7021_ADDR, I2C_SI7021_CMD_MEAURE_TEMP_NO_HOLD);
@@ -122,7 +122,7 @@ void temperature_state_machine(schedEvt_e evt)
     case TEMP_STATE2_MEASUREMENT_WRITE:
       nextState = TEMP_STATE2_MEASUREMENT_WRITE;
 
-      if(evt == evtI2C0_TransferComplete)
+      if(sig == evtI2C0_TransferComplete)
       {
         sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
         timerWaitUs_irq(20000);
@@ -133,7 +133,7 @@ void temperature_state_machine(schedEvt_e evt)
     case TEMP_STATE3_MEASUREMENT_WAIT:
       nextState = TEMP_STATE3_MEASUREMENT_WAIT;
 
-      if(evt == evtLETIMER0_COMP1)
+      if(sig == evtLETIMER0_COMP1)
       {
         sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
         i2cRead(I2C_SI7021_ADDR, 2);
@@ -144,7 +144,7 @@ void temperature_state_machine(schedEvt_e evt)
     case TEMP_STATE4_RETRIEVE:
       nextState = TEMP_STATE4_RETRIEVE;
 
-      if(evt == evtI2C0_TransferComplete)
+      if(sig == evtI2C0_TransferComplete)
       {
         sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
         temp_raw = (i2cGetReadData() >> 8) | ((i2cGetReadData() & 0xFF) << 8);
@@ -154,6 +154,45 @@ void temperature_state_machine(schedEvt_e evt)
         //     round to int   |     do float math
         temp_c = (int32_t) (((175.72*(float)temp_raw)/65536) - 46.85);
         LOG_INFO("Current temp: %d C", temp_c);
+
+        sc = sl_bt_gatt_server_write_attribute_value(
+                           gattdb_temperature_measurement,
+                           0,
+                           4,
+                           (uint8_t *)&temp_c);
+        if (sc != SL_STATUS_OK)
+        {
+//          LOG_ERROR("Error with sl_bt_gatt_server_write_attribute_value: %x", sc);
+        }
+
+        // We recheck the BT connection and indication statuses again to make
+        // sure we dont run into any errors with the si labs functions
+        if( bleDataPtr->conn_open          &&
+            bleDataPtr->temp_indication_en &&
+           !bleDataPtr->indication_inflight)
+        {
+          uint8_t   htm_temperature_buffer[5] = {0};
+          uint8_t  *p = &htm_temperature_buffer[1];
+          uint32_t  htm_temperature_flt;
+
+          htm_temperature_flt = UINT32_TO_FLOAT(temp_c * 1000,  -3);
+          UINT32_TO_BITSTREAM(p, htm_temperature_flt);
+
+          sc = sl_bt_gatt_server_send_indication(bleDataPtr->conn_handle,
+                                                 gattdb_temperature_measurement,
+                                                 sizeof(htm_temperature_buffer),
+                                                 &htm_temperature_buffer[0]);
+          if (sc != SL_STATUS_OK)
+          {
+            LOG_ERROR("Error with sl_bt_gatt_server_send_indication: %x", sc);
+          }
+          else
+          {
+              bleDataPtr->indication_inflight = 1;
+          }
+
+        }
+
         nextState = TEMP_STATE0_IDLE;
       }
 

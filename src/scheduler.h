@@ -8,7 +8,9 @@
 #ifndef SRC_SCHEDULER_H_
 #define SRC_SCHEDULER_H_
 
-// Put in order for priority, highest prio = lowest value
+#include "sl_bt_api.h"
+
+
 typedef enum {
   evtNone = 0,
   evtLETIMER0_UF = 1,
@@ -17,11 +19,10 @@ typedef enum {
 
 } schedEvt_e;
 
-schedEvt_e schedGetNextEvent();
 void schedSetEventLETIMER0_UF();
 void schedSetEventLETIMER0_COMP1();
 void schedSetEventI2C0_TransferComplete();
 
-void temperature_state_machine(schedEvt_e evt);
+void run_state_machines(sl_bt_msg_t *evt);
 
 #endif /* SRC_SCHEDULER_H_ */
