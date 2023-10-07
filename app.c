@@ -63,7 +63,7 @@
 #include "src/timers.h"
 #include "src/i2c.h"
 #include "src/scheduler.h"
-
+#include "src/ble.h"
 
 // Students: Here is an example of how to correctly include logging functions in
 //           each .c file.
@@ -207,43 +207,6 @@ SL_WEAK void app_init(void)
  *****************************************************************************/
 SL_WEAK void app_process_action(void)
 {
-  // Put your application code here for A1 to A4.
-  // This is called repeatedly from the main while(1) loop
-  // Notice: This function is not passed or has access to Bluetooth stack events.
-  //         We will create/use a scheme that is far more energy efficient in
-  //         later assignments.
-
-  schedEvt_e evt;
-
-  evt = schedGetNextEvent();
-
-  temperature_state_machine(evt);
-
-  switch(evt){
-    case evtLETIMER0_UF:
-
-      break;
-    case evtLETIMER0_COMP1:
-
-      // test irq timer
-#if UNIT_TESTING == 1
-      gpioLed0Toggle();
-      gpioLed1Toggle();
-
-      timerWaitUs_irq(1000000);
-#endif
-
-      break;
-    case evtI2C0_TransferComplete:
-      NVIC_DisableIRQ(I2C0_IRQn);
-      break;
-    case evtNone:
-
-      break;
-    default:
-      LOG_INFO("Unkown event detected: %x", (uint32_t) evt);
-      break;
-  }
 
 } // app_process_action()
 
@@ -264,18 +227,14 @@ SL_WEAK void app_process_action(void)
 void sl_bt_on_event(sl_bt_msg_t *evt)
 {
 
-  // Just a trick to hide a compiler warning about unused input parameter evt.
-  (void) evt;
-
   // For A5 onward:
   // Some events require responses from our application code,
   // and don’t necessarily advance our state machines.
   // For A5 uncomment the next 2 function calls
-  // handle_ble_event(evt); // put this code in ble.c/.h
+  handle_ble_event(evt); // put this code in ble.c/.h
 
   // sequence through states driven by events
-  // state_machine(evt);    // put this code in scheduler.c/.h
-
+  run_state_machines(evt);    // put this code in scheduler.c/.h
 
 } // sl_bt_on_event()
 
