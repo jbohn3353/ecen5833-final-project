@@ -53,7 +53,7 @@
 
     <!--Data-->
     <characteristic const="false" id="pp_data" name="Data" sourceId="" uuid="d14ebe66-8284-4db3-8b31-dac6c9c865a1">
-      <value length="64" type="hex" variable_length="false">00</value>
+      <value length="64" type="user" variable_length="false">00</value>
       <properties>
         <read authenticated="false" bonded="false" encrypted="false"/>
       </properties>

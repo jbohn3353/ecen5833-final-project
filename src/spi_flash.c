@@ -26,6 +26,7 @@
 #include "em_gpio.h"
 #include "em_cmu.h"
 #include "em_gpio.h"
+#include "timers.h"
 
 #define US1_PORT       (gpioPortD)
 #define US1_TX         (10)
@@ -58,6 +59,8 @@ void spi_write_enable(void){
 
   // Driving CS high
   GPIO_PinOutSet(US1_PORT, US1_CS);
+
+  for(int i = 0; i < 100000; i++);
 }
 
 
@@ -71,6 +74,8 @@ void spi_write_enable(void){
  * @return [in] none
  ******************************************************************************/
 void spi_write_byte(uint32_t address, uint8_t data){
+
+  spi_write_enable();
 
   // Driving CS low
   GPIO_PinOutClear(US1_PORT, US1_CS);
@@ -101,6 +106,8 @@ void spi_write_byte(uint32_t address, uint8_t data){
  * @return [in] none
  ******************************************************************************/
 void spi_write_page(uint32_t address, const uint8_t *data, uint32_t size){
+
+  spi_write_enable();
 
   if(size>256)
     return;
@@ -143,6 +150,8 @@ void spi_write_page(uint32_t address, const uint8_t *data, uint32_t size){
  ******************************************************************************/
 uint8_t spi_read_byte(uint32_t address){
 
+  spi_write_enable();
+
   // Driving CS low
   GPIO_PinOutClear(US1_PORT, US1_CS);
 
@@ -174,6 +183,8 @@ uint8_t spi_read_byte(uint32_t address){
  ******************************************************************************/
 uint8_t spi_read_SR(void){
 
+  spi_write_enable();
+
   // Driving CS low
   GPIO_PinOutClear(US1_PORT, US1_CS);
 
@@ -200,6 +211,8 @@ uint8_t spi_read_SR(void){
  * @return [in] none
  ******************************************************************************/
 void spi_read_block(uint32_t address, uint8_t *data, uint32_t size){
+
+  spi_write_enable();
 
   // Driving CS low
   GPIO_PinOutClear(US1_PORT, US1_CS);
@@ -234,6 +247,8 @@ void spi_read_block(uint32_t address, uint8_t *data, uint32_t size){
  ******************************************************************************/
 void erase_sector(uint32_t address){
 
+  spi_write_enable();
+
   if((address % 4096) != 0)
     return;
 
@@ -264,6 +279,8 @@ void erase_sector(uint32_t address){
  ******************************************************************************/
 void erase_32Kblock(uint32_t address){
 
+  spi_write_enable();
+
   if((address % (32 * 1024)) != 0)
     return;
   // Driving CS low
@@ -292,8 +309,10 @@ void erase_32Kblock(uint32_t address){
  *
  * @return [in] none
  ******************************************************************************/
-void erase_64kblock(uint32_t address)
-{
+void erase_64kblock(uint32_t address){
+
+  spi_write_enable();
+
   if((address % (64 * 1024)) != 0)
     return;
 
@@ -324,6 +343,8 @@ void erase_64kblock(uint32_t address)
  * @return [in] none
  ******************************************************************************/
 void chip_erase(void){
+
+  spi_write_enable();
 
   // Driving CS low
    GPIO_PinOutClear(US1_PORT, US1_CS);
@@ -373,5 +394,5 @@ void spi_init(void){
   // Enable USART1
   USART_Enable(USART1, usartEnable);
 
-  spi_write_enable();
+  chip_erase();
 }

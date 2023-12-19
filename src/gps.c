@@ -16,6 +16,7 @@
 #include "scheduler.h"
 #include "em_leuart.h"
 #include "data.h"
+#include "spi_flash.h"
 
 #define BOOT_TIME_MS          (30000)
 #define CONFIG_CMD_MAX_SIZE   (32)
@@ -109,6 +110,7 @@ void gps_state_machine(sl_bt_msg_t *evt){
         uint64_t current_time_ms = timer_milliseconds();
 
         if(current_time_ms - start_time_ms >= BOOT_TIME_MS){
+          spi_write_enable();
           uart_init();
 
           config_i = 0;

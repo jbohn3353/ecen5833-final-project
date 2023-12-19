@@ -56,13 +56,13 @@ void handle_ble_event(sl_bt_msg_t *evt)
 
       if(sig == evtLETIMER0_UF){
         if(fetch_data(packet_data, CUSTOM_PACKET_SIZE)){
-//          spi_write_page(ble_data.flash_write_p*0x100, packet_data, CUSTOM_PACKET_SIZE);
+          spi_write_page((ble_data.flash_write_p++)*0x100, packet_data, CUSTOM_PACKET_SIZE);
 
-          sc = sl_bt_gatt_server_write_attribute_value(
-                                     gattdb_pp_data,
-                                     0,
-                                     CUSTOM_PACKET_SIZE,
-                                     (uint8_t *)&packet_data);
+//          sc = sl_bt_gatt_server_write_attribute_value(
+//                                     gattdb_pp_data,
+//                                     0,
+//                                     CUSTOM_PACKET_SIZE,
+//                                     (uint8_t *)&packet_data);
         }
       }
 
@@ -314,9 +314,36 @@ void handle_ble_event(sl_bt_msg_t *evt)
 
       break;
 
-    //**************************************************************************
-    // Events only for clients
-    //**************************************************************************
+    // Generate when read requests occur
+    //PACKSTRUCT( struct sl_bt_evt_gatt_server_user_read_request_s
+    //{
+    //uint8_t  connection;     /**< Connection handle */
+    //uint16_t characteristic; /**< GATT characteristic handle. This value is
+    //                              normally received from the gatt_characteristic
+    //                              event. */
+    //uint8_t  att_opcode;     /**< Enum @ref sl_bt_gatt_att_opcode_t. Attribute
+    //                              opcode that informs the procedure from which the
+    //                              value was received. */
+    //uint16_t offset;         /**< Value offset */
+    //});
+    case sl_bt_evt_gatt_server_user_read_request_id:;
+      sl_bt_evt_gatt_server_user_read_request_t read_request_info = evt->data.evt_gatt_server_user_read_request;
 
+      uint8_t flash_data[CUSTOM_PACKET_SIZE];
+
+      if(ble_data.flash_read_p >= ble_data.flash_write_p){
+        memset(flash_data, 0, CUSTOM_PACKET_SIZE);
+      }
+      else{
+        spi_read_block((ble_data.flash_read_p++)*0x100, flash_data, CUSTOM_PACKET_SIZE);
+      }
+
+      sl_bt_gatt_server_send_user_read_response(ble_data.conn_handle,
+                                                gattdb_pp_data,
+                                                0, // generic error
+                                                CUSTOM_PACKET_SIZE,
+                                                flash_data,
+                                                NULL);
+      break;
   }
 } // handle_ble_event()
