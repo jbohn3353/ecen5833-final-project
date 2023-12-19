@@ -42,7 +42,7 @@ uint32_t loggerGetTimestamp()
      //           assignments that require logging (a fancy printf).
      //           Put the letimerMilliseconds() function in your irq.c/.h files.
 
-     return timerMilliseconds();
+     return timer_milliseconds();
 	   
 } // loggerGetTimestamp
 

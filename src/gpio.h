@@ -16,35 +16,25 @@
  
  */
 
-
-// Students: Remember, a header file (a .h file) generally defines an interface
-//           for functions defined within an implementation file (a .c file).
-//           The .h file defines what a caller (a user) of a .c file requires.
-//           At a minimum, the .h file should define the publicly callable
-//           functions, i.e. define the function prototypes. #define and type
-//           definitions can be added if the caller requires theses.
-
-
 #ifndef SRC_GPIO_H_
 #define SRC_GPIO_H_
 
-
-
-
 // Function prototypes
-void gpioInit();
-void gpioLed0SetOn();
-void gpioLed0SetOff();
-void gpioLed0Toggle();
-void gpioLed1SetOn();
-void gpioLed1SetOff();
-void gpioLed1Toggle();
+void gpio_init();
+void gpio_led_on();
+void gpio_led_off();
+void gpio_sensor_enable_on();
+void gpio_sensor_enable_off();
+void gpio_gen1_on();
+void gpio_gen1_off();
+void gpio_gen2_on();
+void gpio_gen2_off();
+void gpio_gen3_on();
+void gpio_gen3_off();
 
-void gpioSensorEnableSetOn();
-void gpioSensorEnableSetOff();
-
-
-
-
+void gpio_accel_int1_enable();
+void gpio_accel_int1_disable();
+void gpio_accel_int2_enable();
+void gpio_accel_int2_disable();
 
 #endif /* SRC_GPIO_H_ */

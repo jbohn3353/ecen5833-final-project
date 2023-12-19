@@ -15,6 +15,9 @@
 #define INCLUDE_LOG_DEBUG 1
 #include "log.h"
 
+#include "data.h"
+#include "scheduler.h"
+
 #define ADVERTISING_INTERVAL_MIN_MS   (250)
 #define ADVERTISING_INTERVAL_MAX_MS   (250)
 #define CONNECTION_INTERVAL_MIN_MS    (75)
@@ -24,6 +27,8 @@
 
 // must be at least (1 + SLAVE_LATENCY_CNT) * (2 * CONNECTION_INTERVAL_MS)
 #define SUPERVISION_TIMEOUT_MS        ((2 + SLAVE_LATENCY_CNT) * (2 * CONNECTION_INTERVAL_MAX_MS))
+
+#define CUSTOM_PACKET_SIZE            (64)
 
 // BLE private data
 static ble_data_struct_t ble_data = {0};
@@ -44,6 +49,24 @@ void handle_ble_event(sl_bt_msg_t *evt)
 
   switch(SL_BT_MSG_ID(evt->header))
   {
+    case sl_bt_evt_system_external_signal_id:;
+      schedEvt_e sig = evt->data.evt_system_external_signal.extsignals;
+
+      uint8_t packet_data[CUSTOM_PACKET_SIZE];
+
+      if(sig == evtLETIMER0_UF){
+        if(fetch_data(packet_data, CUSTOM_PACKET_SIZE)){
+//          spi_write_page(ble_data.flash_write_p*0x100, packet_data, CUSTOM_PACKET_SIZE);
+
+          sc = sl_bt_gatt_server_write_attribute_value(
+                                     gattdb_pp_data,
+                                     0,
+                                     CUSTOM_PACKET_SIZE,
+                                     (uint8_t *)&packet_data);
+        }
+      }
+
+      break;
     //**************************************************************************
     // Events common to servers and clients
     //**************************************************************************
@@ -62,6 +85,9 @@ void handle_ble_event(sl_bt_msg_t *evt)
     // });
     case sl_bt_evt_system_boot_id:;
       //sl_bt_evt_system_boot_t boot_info = evt->data.evt_system_boot;
+
+      ble_data.flash_write_p = 0;
+      ble_data.flash_read_p = 0;
 
       // Returns the unique BT device address
       sc = sl_bt_system_get_identity_address(&ble_data.myAddress, &ble_data.myAddressType);
@@ -251,29 +277,29 @@ void handle_ble_event(sl_bt_msg_t *evt)
     case sl_bt_evt_gatt_server_characteristic_status_id:;
       sl_bt_evt_gatt_server_characteristic_status_t char_status_info = evt->data.evt_gatt_server_characteristic_status;
 
-      // check if its a permission update and not an ack
-      if(char_status_info.status_flags == sl_bt_gatt_server_client_config)
-      {
-        // check which characteristic its for (might change to switch case later)
-        if(char_status_info.characteristic == gattdb_temperature_measurement)
-        {
-          // set flag based on what the permission change actually is (might change to switch case later)
-          if(char_status_info.client_config_flags == sl_bt_gatt_server_indication ||
-             char_status_info.client_config_flags == sl_bt_gatt_server_notification_and_indication)
-          {
-            ble_data.temp_indication_en = 1;
-          }
-          else
-          {
-            ble_data.temp_indication_en = 0;
-          }
-        }
-      }
-
-      if(char_status_info.status_flags == sl_bt_gatt_server_confirmation)
-      {
-        ble_data.indication_inflight = 0;
-      }
+//      // check if its a permission update and not an ack
+//      if(char_status_info.status_flags == sl_bt_gatt_server_client_config)
+//      {
+//        // check which characteristic its for (might change to switch case later)
+//        if(char_status_info.characteristic == gattdb_temperature_measurement)
+//        {
+//          // set flag based on what the permission change actually is (might change to switch case later)
+//          if(char_status_info.client_config_flags == sl_bt_gatt_server_indication ||
+//             char_status_info.client_config_flags == sl_bt_gatt_server_notification_and_indication)
+//          {
+//            ble_data.temp_indication_en = 1;
+//          }
+//          else
+//          {
+//            ble_data.temp_indication_en = 0;
+//          }
+//        }
+//      }
+//
+//      if(char_status_info.status_flags == sl_bt_gatt_server_confirmation)
+//      {
+//        ble_data.indication_inflight = 0;
+//      }
 
       break;
 
@@ -285,8 +311,6 @@ void handle_ble_event(sl_bt_msg_t *evt)
     //});
     case sl_bt_evt_gatt_server_indication_timeout_id:;
       //sl_bt_evt_gatt_server_indication_timeout_t ind_timeot_info = evt->data.evt_gatt_server_indication_timeout;
-
-      ble_data.indication_inflight = 0;
 
       break;
 

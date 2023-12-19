@@ -11,9 +11,14 @@
 #include <stdint.h>
 
 // Function Prototypes
+
 void LETIMER0_IRQHandler();
 void I2C0_IRQHandler();
+void I2C1_IRQHandler();
+void GPIO_EVEN_IRQHandler();
+void GPIO_ODD_IRQHandler();
+void LEUART0_IRQHandler();
 
-uint64_t irqTimerUFCntGet();
+uint64_t irq_timer_UF_cnt_get();
 
 #endif /* SRC_IRQ_H */

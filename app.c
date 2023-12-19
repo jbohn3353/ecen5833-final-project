@@ -59,11 +59,14 @@
 #include "src/ble_device_type.h"
 #include "src/gpio.h"
 #include "src/lcd.h"
-#include "src/oscillators.h"
 #include "src/timers.h"
 #include "src/i2c.h"
 #include "src/scheduler.h"
 #include "src/ble.h"
+#include "src/accel.h"
+#include "src/trh.h"
+#include "src/gps.h"
+#include "src/spi_flash.h"
 
 // Students: Here is an example of how to correctly include logging functions in
 //           each .c file.
@@ -173,32 +176,15 @@ SL_WEAK void app_init(void)
   sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM2);
 #endif
 
-  oscillatorsInit();
-  gpioInit();
-  initLETIMER0();
-  i2cInit();
+  gpio_init();
+  timer0_init();
+  accel_init();
+  spi_init();
+
+  LOG_INFO("Starting...");
 
   NVIC_ClearPendingIRQ(LETIMER0_IRQn);
   NVIC_EnableIRQ(LETIMER0_IRQn);
-
-#if UNIT_TESTING == 1
-   // test polled timer
-   timerWaitUs_polled(10000);
-   gpioLed0Toggle();
-   gpioLed1Toggle();
-   timerWaitUs_polled(10000);
-   gpioLed0Toggle();
-   gpioLed1Toggle();
-   timerWaitUs_polled(100000);
-   gpioLed0Toggle();
-   gpioLed1Toggle();
-   timerWaitUs_polled(1000000);
-   gpioLed0Toggle();
-   gpioLed1Toggle();
-
-   // setup irq timer test
-   timerWaitUs_irq(1000000);
-#endif
 } // app_init()
 
 
@@ -227,14 +213,14 @@ SL_WEAK void app_process_action(void)
 void sl_bt_on_event(sl_bt_msg_t *evt)
 {
 
-  // For A5 onward:
-  // Some events require responses from our application code,
-  // and don’t necessarily advance our state machines.
-  // For A5 uncomment the next 2 function calls
   handle_ble_event(evt); // put this code in ble.c/.h
 
   // sequence through states driven by events
-  run_state_machines(evt);    // put this code in scheduler.c/.h
+  //run_state_machines(evt);    // put this code in scheduler.c/.h
+
+  accel_state_machine(evt);
+  trh_state_machine(evt);
+  gps_state_machine(evt);
 
 } // sl_bt_on_event()
 

@@ -21,19 +21,17 @@
 // Modern C (circa 2021 does it this way)
 // typedef ble_data_struct_t is referred to as an anonymous struct definition
 typedef struct {
- // values that are common to servers and clients
- bd_addr myAddress;
- uint8_t myAddressType;
- uint8_t conn_handle;
+  // values that are common to servers and clients
+  bd_addr myAddress;
+  uint8_t myAddressType;
+  uint8_t conn_handle;
 
- // values unique for server
- // The advertising set handle allocated from Bluetooth stack.
- uint8_t advertisingSetHandle;
- uint8_t conn_open;
- uint8_t temp_indication_en;
- uint8_t indication_inflight;
-
- // values unique for client
+  // values unique for server
+  // The advertising set handle allocated from Bluetooth stack.
+  uint8_t advertisingSetHandle;
+  uint8_t conn_open;
+  uint32_t flash_write_p;
+  uint32_t flash_read_p;
 
 } ble_data_struct_t;
 

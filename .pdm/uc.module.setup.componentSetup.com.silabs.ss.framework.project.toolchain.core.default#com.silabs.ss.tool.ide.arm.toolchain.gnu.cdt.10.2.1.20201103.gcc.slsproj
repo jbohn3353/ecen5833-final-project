@@ -248,6 +248,7 @@
           <file name="em_gpio.h" linked="false" uri="studio:/sdk/platform/emlib/inc/em_gpio.h"/>
           <file name="em_i2c.h" linked="false" uri="studio:/sdk/platform/emlib/inc/em_i2c.h"/>
           <file name="em_letimer.h" linked="false" uri="studio:/sdk/platform/emlib/inc/em_letimer.h"/>
+          <file name="em_leuart.h" linked="false" uri="studio:/sdk/platform/emlib/inc/em_leuart.h"/>
           <file name="em_msc.h" linked="false" uri="studio:/sdk/platform/emlib/inc/em_msc.h"/>
           <file name="em_msc_compat.h" linked="false" uri="studio:/sdk/platform/emlib/inc/em_msc_compat.h"/>
           <file name="em_prs.h" linked="false" uri="studio:/sdk/platform/emlib/inc/em_prs.h"/>
@@ -264,6 +265,7 @@
           <file name="em_gpio.c" linked="false" uri="studio:/sdk/platform/emlib/src/em_gpio.c"/>
           <file name="em_i2c.c" linked="false" uri="studio:/sdk/platform/emlib/src/em_i2c.c"/>
           <file name="em_letimer.c" linked="false" uri="studio:/sdk/platform/emlib/src/em_letimer.c"/>
+          <file name="em_leuart.c" linked="false" uri="studio:/sdk/platform/emlib/src/em_leuart.c"/>
           <file name="em_msc.c" linked="false" uri="studio:/sdk/platform/emlib/src/em_msc.c"/>
           <file name="em_prs.c" linked="false" uri="studio:/sdk/platform/emlib/src/em_prs.c"/>
           <file name="em_rtcc.c" linked="false" uri="studio:/sdk/platform/emlib/src/em_rtcc.c"/>

@@ -48,14 +48,6 @@
 #define APP_H
 
 #define LOWEST_ENERGY_MODE      (2)     // EM
-#define LETIMER_ON_TIME_MS      (175)
-#define LETIMER_PERIOD_MS       (3000)
-
-#if LOWEST_ENERGY_MODE == 3
-#define LETIMER_PRESCALER_VAL   (1)
-#else
-#define LETIMER_PRESCALER_VAL   (4)
-#endif
 
 #define UNIT_TESTING (0)
 

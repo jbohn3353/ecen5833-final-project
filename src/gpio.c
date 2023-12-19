@@ -19,112 +19,103 @@
  
  */
 
-
-// *****************************************************************************
-// Students:
-// We will be creating additional functions that configure and manipulate GPIOs.
-// For any new GPIO function you create, place that function in this file.
-// *****************************************************************************
-
 #include <stdbool.h>
 #include "em_gpio.h"
 #include <string.h>
 
 #include "gpio.h"
+#include "em_cmu.h"
 
+#define LED_PORT            (gpioPortC)
+#define LED_PIN             (0x6)
 
-// See the radio board user guide at https://www.silabs.com/documents/login/user-guides/ug279-brd4104a-user-guide.pdf
-// and GPIO documentation at https://siliconlabs.github.io/Gecko_SDK_Doc/efm32g/html/group__GPIO.html
-// to determine the correct values for these.
-// If these links have gone bad, consult the reference manual and/or the datasheet for the MCU.
-// Change to correct port and pins:
-#define LED_port   (gpioPortF)
-#define LED0_pin   (0x4)
-#define LED1_pin   (0x5)
+#define SENSOR_ENABLE_PORT  (gpioPortF)
+#define SENSOR_ENABLE_PIN   (7)
 
-#define SENSOR_ENABLE_PORT  (gpioPortD)
-#define SENSOR_ENABLE_PIN   (15)
+#define GEN_GPIO_PORT       (gpioPortB)
+#define GEN_GPIO1_PIN       (11)
+#define GEN_GPIO2_PIN       (12)
+#define GEN_GPIO3_PIN       (13)
 
-static int led0State = 0;
-static int led1State = 0;
+#define GPIO_ACCEL_PORT     (gpioPortA)
+#define GPIO_ACCEL_INT1_PIN (5) // cross referenced in irq.c (sry)
+#define GPIO_ACCEL_INT2_PIN (4) // cross referenced in irq.c (sry)
 
 // Set GPIO drive strengths and modes of operation
-void gpioInit()
-{
+void gpio_init(){
+  CMU_ClockEnable(cmuClock_GPIO, true);
 
-    // Set the port's drive strength. In this MCU implementation, all GPIO cells
-    // in a "Port" share the same drive strength setting. 
-//	GPIO_DriveStrengthSet(LED_port, gpioDriveStrengthStrongAlternateStrong); // Strong, 10mA
-	GPIO_DriveStrengthSet(LED_port, gpioDriveStrengthWeakAlternateWeak); // Weak, 1mA
-	
-	// Set the 2 GPIOs mode of operation
-	GPIO_PinModeSet(LED_port, LED0_pin, gpioModePushPull, false);
-	GPIO_PinModeSet(LED_port, LED1_pin, gpioModePushPull, false);
+	GPIO_PinModeSet(LED_PORT, LED_PIN, gpioModePushPull, false);
+  GPIO_PinModeSet(SENSOR_ENABLE_PORT, SENSOR_ENABLE_PIN, gpioModePushPull, false);
+  GPIO_PinModeSet(GEN_GPIO_PORT, GEN_GPIO1_PIN, gpioModePushPull, false);
+  GPIO_PinModeSet(GEN_GPIO_PORT, GEN_GPIO2_PIN, gpioModePushPull, false);
+  GPIO_PinModeSet(GEN_GPIO_PORT, GEN_GPIO3_PIN, gpioModePushPull, false);
 
+  GPIO_PinModeSet(GPIO_ACCEL_PORT, GPIO_ACCEL_INT1_PIN, gpioModeInput, 0);
+  GPIO_ExtIntConfig(GPIO_ACCEL_PORT, GPIO_ACCEL_INT1_PIN, GPIO_ACCEL_INT1_PIN, true, false, true);
 
+  GPIO_PinModeSet(GPIO_ACCEL_PORT, GPIO_ACCEL_INT2_PIN, gpioModeInput, 0);
+  GPIO_ExtIntConfig(GPIO_ACCEL_PORT, GPIO_ACCEL_INT2_PIN, GPIO_ACCEL_INT2_PIN, true, false, true);
+
+  NVIC_ClearPendingIRQ(GPIO_EVEN_IRQn);
+  NVIC_EnableIRQ(GPIO_EVEN_IRQn);
+
+  NVIC_ClearPendingIRQ(GPIO_ODD_IRQn);
+  NVIC_EnableIRQ(GPIO_ODD_IRQn);
 } // gpioInit()
 
-
-void gpioLed0SetOn()
-{
-  led0State = 1;
-	GPIO_PinOutSet(LED_port, LED0_pin);
+void gpio_led_on(){
+	GPIO_PinOutSet(LED_PORT, LED_PIN);
 }
 
-
-void gpioLed0SetOff()
-{
-  led0State = 0;
-  GPIO_PinOutClear(LED_port, LED0_pin);
+void gpio_led_off(){
+  GPIO_PinOutClear(LED_PORT, LED_PIN);
 }
 
-void gpioLed0Toggle()
-{
-  led0State = !led0State;
-  if(led0State)
-  {
-    GPIO_PinOutSet(LED_port, LED0_pin);
-  }
-  else
-  {
-    GPIO_PinOutClear(LED_port, LED0_pin);
-  }
-}
-
-void gpioLed1SetOn()
-{
-  led1State = 1;
-	GPIO_PinOutSet(LED_port, LED1_pin);
-}
-
-
-void gpioLed1SetOff()
-{
-  led1State = 0;
-	GPIO_PinOutClear(LED_port, LED1_pin);
-}
-
-void gpioLed1Toggle()
-{
-  led1State = !led1State;
-  if(led1State)
-  {
-    GPIO_PinOutSet(LED_port, LED1_pin);
-  }
-  else
-  {
-    GPIO_PinOutClear(LED_port, LED1_pin);
-  }
-}
-
-void gpioSensorEnableSetOn()
-{
+void gpio_sensor_enable_on(){
   GPIO_PinOutSet(SENSOR_ENABLE_PORT, SENSOR_ENABLE_PIN);
 }
 
-void gpioSensorEnableSetOff()
-{
+void gpio_sensor_enable_off(){
   GPIO_PinOutClear(SENSOR_ENABLE_PORT, SENSOR_ENABLE_PIN);
 }
 
+void gpio_gen1_on(){
+  GPIO_PinOutSet(GEN_GPIO_PORT, GEN_GPIO1_PIN);
+}
 
+void gpio_gen1_off(){
+  GPIO_PinOutClear(GEN_GPIO_PORT, GEN_GPIO1_PIN);
+}
+
+void gpio_gen2_on(){
+  GPIO_PinOutSet(GEN_GPIO_PORT, GEN_GPIO2_PIN);
+}
+
+void gpio_gen2_off(){
+  GPIO_PinOutClear(GEN_GPIO_PORT, GEN_GPIO2_PIN);
+}
+
+void gpio_gen3_on(){
+  GPIO_PinOutSet(GEN_GPIO_PORT, GEN_GPIO3_PIN);
+}
+
+void gpio_gen3_off(){
+  GPIO_PinOutClear(GEN_GPIO_PORT, GEN_GPIO3_PIN);
+}
+
+void gpio_accel_int1_enable(){
+  GPIO_ExtIntConfig(GPIO_ACCEL_PORT, GPIO_ACCEL_INT1_PIN, GPIO_ACCEL_INT1_PIN, true, false, true);
+}
+
+void gpio_accel_int1_disable(){
+  GPIO_ExtIntConfig(GPIO_ACCEL_PORT, GPIO_ACCEL_INT1_PIN, GPIO_ACCEL_INT1_PIN, true, false, false);
+}
+
+void gpio_accel_int2_enable(){
+  GPIO_ExtIntConfig(GPIO_ACCEL_PORT, GPIO_ACCEL_INT2_PIN, GPIO_ACCEL_INT2_PIN, true, false, true);
+}
+
+void gpio_accel_int2_disable(){
+  GPIO_ExtIntConfig(GPIO_ACCEL_PORT, GPIO_ACCEL_INT2_PIN, GPIO_ACCEL_INT2_PIN, true, false, false);
+}
