@@ -4,7 +4,7 @@
  *  Created on: Dec 18, 2023
  *      Author: jbohn
  *
- *      @resource adapted from Devang + group
+ *      @resource shared driver with Devang + group
  */
 
 #include "uart.h"
